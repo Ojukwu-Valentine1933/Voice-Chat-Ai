@@ -1,25 +1,29 @@
 const express = require("express")
 const app = express()
 const cors = require("cors");
-const dotenv = require ("dotenv")
-const mongoose = require("mongoose");
-
+const authRoute = require("./route/authRoute");
 
 
 
 const corsOption = {
-    origin: "http://localhost:3001",
+    origin: "http://localhost:3000",
     optionSuccessStatus: 200,
 };
 
-dotenv.config();
 
 app.use(cors(corsOption));
+
+// Use built-in middleware for parsing JSON and URL-encoded data
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use("/auth", authRoute)
+
 
 app.get("/", (req, res) => {
     res.json({ message: "Server is running fine" });
 })
+
 
 module.exports = app
 
