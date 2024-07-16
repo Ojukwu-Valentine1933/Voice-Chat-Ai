@@ -1,39 +1,44 @@
-const User = require("../model/userModel")
-const verifyToken = require("../helpers/authHelpers")
+const { findUserByEmail, createNewUser } = require("../services/userServices");
+
 const googleAuth = async (req, res) => {
-    const {token}= req.body
-    if(!token){
-        return res.status(400).json({message:"Google Auth failed"})
-    } else {
-        
-        
-        const payload = await verifyToken(token)
+ try{
+  const { email, picture, given_name, family_name, token } = req.user;
+
+  const user = await findUserByEmail(email);
+  if (!user) {
+    const newUser = await createNewUser({
+      firstName: given_name,
+      lastName: family_name,
+      profilePicture: picture,
+       email,
+    });
+
+    if(!newUser){
+      return res.status(400).json({ error:"login failed" })
+    }
+    return res.status(200).json({ message: "success", newUser, token });
+  }
+    return res.status(201).json({ message: "success", user, token });
+ 
+ }catch(error){
+  return res.status(500).json({ error:"something went wrong" })
+ }
+}
 
 
-        console.log(payload)
+const getCurrentUser = async (req, res) => {
+  try {
 
-
-
-        if(!payload){
-            return res.status(400).json({message:"Google Auth failed"})
-        } 
-        const {email, picture, given_name, family_name} = payload;
-
-        const user = await User.findOne({email})
-        if(!user){
-            const newUser = new User({
-                firstName: given_name,
-                lastName: family_name,
-                profilePicture: picture,
-                emailAddress: email
-            })
-       
-          await newUser.save()
-            return res.status(200).json({message: "success", newUser, token})
-        } else {
-            return res.status(200).json({message: "success", user, token})
-        }
+    const { email } = req.user;
+    const user = await findUserByEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-}
-module.exports = googleAuth
+    return res.status(200).json({ user });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+module.exports = { googleAuth, getCurrentUser };

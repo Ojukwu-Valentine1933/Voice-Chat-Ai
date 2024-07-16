@@ -1,27 +1,29 @@
 const http = require("http");
 const app = require("./app")
-const server = http.createServer(app);
-const {DB_URI} = require("./config/dotEnv")
-const mongoose = require("mongoose");
+const httpServer = http.createServer(app);
+const mongooseConnection = require("./mongoose")
+const {Server} = require("socket.io")
 const {PORT} = require("./config/dotEnv")
+const socketServer  = require("./SocketServer")
 
 
 
-mongoose.connect(DB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-.then(() => {
-    console.log('Connected to MongoDB');
-})
-.catch((error) => {
-    console.error('Error connecting to MongoDB:', error);
-});
+
+const io = new Server(httpServer, {
+    cors: {
+      origin: "http://localhost:3000",
+    },
+  });
+
+
+
 
 const startServer = async()=>{
-    server.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
     });
+    mongooseConnection();
+    socketServer.listen(io);
 }
 
 startServer();

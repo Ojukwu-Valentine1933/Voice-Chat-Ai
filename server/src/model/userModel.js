@@ -20,7 +20,7 @@ const userSchema = new Schema(
             required: true,
 
         },
-        emailAddress: {
+        email: {
             type: String,
             required: true,
         },     

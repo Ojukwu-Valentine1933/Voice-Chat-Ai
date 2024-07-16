@@ -2,6 +2,7 @@ const express = require("express")
 const app = express()
 const cors = require("cors");
 const authRoute = require("./route/authRoute");
+const AudioRoute = require("./route/AudioRouting");
 
 
 
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRoute)
+app.use("/audio", AudioRoute);
 
 
 app.get("/", (req, res) => {
